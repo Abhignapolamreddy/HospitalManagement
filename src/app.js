@@ -1,4 +1,5 @@
-const express=require('express')
+const express=require('express');
+const userRouter = require('./modules/patient/patient.routes');
 
 const app=express()
 app.use(express.json())
