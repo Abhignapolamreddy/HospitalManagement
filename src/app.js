@@ -1,3 +1,4 @@
+
 const express=require('express');
 const userRouter = require('./modules/patient/patient.routes');
 
@@ -10,6 +11,12 @@ const authRoutes = require("./modules/auth/auth.routes");
  
 app.use("/api/auth", authRoutes);
  
+
+
+
+app.use("/admin",adminRoutes)
+
+
 app.get('/',(req,res)=>{
     res.send('Our Hospital API running');
 })
