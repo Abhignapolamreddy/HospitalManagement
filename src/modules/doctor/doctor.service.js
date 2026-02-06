@@ -1,52 +1,80 @@
-const Doctor=require('./models/Doctor.js');
-const bcrypt=require("bcrypt");
-const jwt=require("jsonwebtoken");
-
-
-const registerDoctor=async(data)=>{
-    const{
-        name,
-        email,
-        password,
-        phone,
-        user_id,
-        specialization_id,
-        availability_schedule
-    }=data;
-
-    
-     if (!name || !email || !password || !user_id || !specialization_id || !availability_schedule) {
-         return { status: 400, payload: { success: false, message: "All required fields must be filled" } };
-     }
-
-     
- // duplicate email
-        const existsEmail = await Doctor.findOne({ email: email.toLowerCase() });
-            if (existsEmail) {
-               return { status: 409, payload: { success: false, message: "Email already exists" } };
-           }
-
-           
-      if (phone) {
-          const existsPhone = await Doctor.findOne({ phone });
-       if (existsPhone) {
-           return { status: 409, payload: { success: false, message: "Phone already exists" } };
-       }
+const Doctor = require("../../models/Doctor");
+const User = require("../../models/User");
+const Appointment = require("../../models/Appointment");
+ 
+/**
+* ADMIN → Create doctor profile (USER already exists with role DOCTOR)
+*/
+exports.createDoctorProfile = async (data) => {
+  // check user exists & role is DOCTOR
+  const user = await User.findById(data.userId);
+ 
+  if (!user || user.role !== "DOCTOR") {
+    throw new Error("Invalid doctor user");
   }
-  const existUser=await Doctor.findOne({user_id});
-    if(existUser){
-        return {status:409, payload:{success:false, message:"user_id already taken"}}
-    }
-    
-    const salt= await bcrypt.genSalt(10)
-
-}
-
-
-
-
-
-
-
-module.exports={registerDoctor};
+ 
+  // prevent duplicate profile
+  const exists = await Doctor.findOne({ userId: data.userId });
+  if (exists) throw new Error("Doctor profile already exists");
+ 
+  // create doctor profile
+  const doctor = await Doctor.create({
+    userId: data.userId,
+    specialist: data.specialist,
+    experience: data.experience || 0,
+  });
+ 
+  return doctor;
+};
+ 
+/**
+* DOCTOR → View own profile
+*/
+exports.getMyProfile = async (userId) => {
+  const doctor = await Doctor.findOne({ userId })
+    .populate("userId", "name email role");
+ 
+  if (!doctor) throw new Error("Doctor profile not found");
+ 
+  return doctor;
+};
+ 
+/**
+* DOCTOR → View own appointments
+*/
+exports.getMyAppointments = async (userId) => {
+  return await Appointment.find({ doctorId: userId })
+    .populate("patientId", "name email")
+    .sort({ appointmentDate: 1 });
+};
+ 
+/**
+* DOCTOR → Update appointment status
+*/
+exports.updateAppointmentStatus = async (appointmentId, status) => {
+  const appointment = await Appointment.findByIdAndUpdate(
+    appointmentId,
+    { status },
+    { new: true }
+  );
+ 
+  if (!appointment) throw new Error("Appointment not found");
+ 
+  return appointment;
+};
+ 
+/**
+* DOCTOR → Update availability
+*/
+exports.updateAvailability = async (userId, availability) => {
+  const doctor = await Doctor.findOneAndUpdate(
+    { userId },
+    { availability },
+    { new: true }
+  );
+ 
+  if (!doctor) throw new Error("Doctor not found");
+ 
+  return doctor;
+};
 
