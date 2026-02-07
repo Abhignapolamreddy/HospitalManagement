@@ -13,6 +13,8 @@ const appointmentRoutes = require("./modules/appointment/appointment.routes");
 //console.log(process.env.JWT_SECRET)
  
 app.use("/api/auth", authRoutes);
+app.use("/hos",userRouter)
+  app.get('/',(req,res)=>{
  
 
 
@@ -30,6 +32,6 @@ app.use("/appointments", appointmentRoutes);
 
 app.get('/',(req,res)=>{
     res.send('Our Hospital API running');
-})
+ })
 
 module.exports=app;
