@@ -5,6 +5,9 @@ const userRouter = require('./modules/patient/patient.routes');
 const app=express()
 app.use(express.json())
 app.use(express.urlencoded({extended:true}));
+
+console.log(process.env.JWT_SECRET)
+
 const authRoutes = require("./modules/auth/auth.routes");
 const doctorRoutes = require("./modules/doctor/doctor.routes");
 const appointmentRoutes = require("./modules/appointment/appointment.routes");
@@ -17,15 +20,12 @@ app.use("/hos",userRouter)
   app.get('/',(req,res)=>{
  
 
-
-
 app.use("/admin",adminRoutes)
 
 
  
 app.use("/doctors", doctorRoutes);
 
-c
  
 app.use("/appointments", appointmentRoutes);
 
