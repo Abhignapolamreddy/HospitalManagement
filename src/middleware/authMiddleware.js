@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
  
 module.exports = (req, res, next) => {
-  const authHeader = req.headers.authorization;
+  const authHeader = req.headers?.authorization;
  
   if (!authHeader)
     return res.status(401).json({ message: "Token missing" });
@@ -11,7 +11,7 @@ module.exports = (req, res, next) => {
   try {
     //const secret="abhi"
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.userId = decoded.id;
+    req.user = decoded;
     next();
   } catch (err) {
     return res.status(401).json({ message: "Invalid token" });
