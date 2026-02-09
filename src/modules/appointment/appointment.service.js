@@ -1,26 +1,28 @@
 const Appointment = require("../../models/Appointment");
-const User = require("../../models/User");
+const User = require("../../models/Auth");
+const Doctor=require("../../models/Doctor")
  
 /**
  * PATIENT → Book appointment
  */
-exports.bookAppointment = async (data) => {
-  // check doctor exists
-  const doctor = await User.findById(data.doctorId);
-  if (!doctor || doctor.role !== "DOCTOR") {
-    throw new Error("Invalid doctor");
-  }
+exports.bookAppointment = async (data,patientId) => {
+  // 1check doctor exists
+  const doctor = await Doctor.findById(data.doctorId);
+  if (!doctor) throw new Error("Doctor not found");
  
-  // prevent double booking (same doctor, same time)
+  // 2️ prevent double booking (same doctor, same date, same time)
   const exists = await Appointment.findOne({
+  
     doctorId: data.doctorId,
     appointmentDate: data.appointmentDate,
-    status: "BOOKED",
+    appointmentTime: data.appointmentTime,
+    status: "CONFIRMED",
   });
  
-  if (exists) throw new Error("Slot already booked");
+  if (exists) throw new Error("Time slot already booked");
  
-  return await Appointment.create(data);
+  // 3️create appointment
+  return await Appointment.create({...data,patientId});
 };
  
 /**
@@ -35,8 +37,12 @@ exports.getMyAppointments = async (patientId) => {
 /**
  * DOCTOR → View own appointments
  */
-exports.getDoctorAppointments = async (doctorId) => {
-  return await Appointment.find({ doctorId })
+exports.getDoctorAppointments = async (userId) => {
+  const doctor=await Doctor.findOne({userId: userId})
+  console.log(userId)
+  console.log(doctor)
+  if(!doctor)throw new Error("Doctor Profile not found")
+  return await Appointment.find({ doctorId: doctor._id })
     .populate("patientId", "name email")
     .sort({ appointmentDate: 1 });
 };
@@ -72,76 +78,4 @@ exports.cancelAppointment = async (appointmentId, patientId) => {
 };
  
 const service = require("./appointment.service");
- 
-/**
- * PATIENT → Book
- */
-exports.book = async (req, res) => {
-  try {
-    const result = await service.bookAppointment({
-      ...req.body,
-      patientId: req.user.id,
-    });
- 
-    res.status(201).json(result);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-};
- 
-/**
- * PATIENT → My appointments
- */
-exports.myAppointments = async (req, res) => {
-  try {
-    const result = await service.getMyAppointments(req.user.id);
-    res.status(200).json(result);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
- 
-/**
- * DOCTOR → View appointments
- */
-exports.doctorAppointments = async (req, res) => {
-  try {
-    const result = await service.getDoctorAppointments(req.user.id);
-    res.status(200).json(result);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
- 
-/**
- * DOCTOR → Update status
- */
-exports.updateStatus = async (req, res) => {
-  try {
-    const result = await service.updateStatus(
-      req.params.id,
-      req.body.status
-    );
- 
-    res.status(200).json(result);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-};
- 
-/**
- * PATIENT → Cancel
- */
-exports.cancel = async (req, res) => {
-  try {
-    const result = await service.cancelAppointment(
-      req.params.id,
-      req.user.id
-    );
- 
-    res.status(200).json(result);
-  } catch (err) {
-    res.status(404).json({ message: err.message });
-  }
-};
  

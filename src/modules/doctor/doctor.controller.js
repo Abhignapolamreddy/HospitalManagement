@@ -54,7 +54,7 @@ exports.updateStatus = async (req, res) => {
  
 /**
 * DOCTOR → Update availability
-*/
+
 exports.updateAvailability = async (req, res) => {
   try {
     const result = await doctorService.updateAvailability(
@@ -63,6 +63,46 @@ exports.updateAvailability = async (req, res) => {
     );
  
     res.status(200).json(result);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};*/
+
+/** Add availability */
+exports.addAvailability = async (req, res) => {
+  try {
+    const result = await doctorService.addAvailability(req.user.id, req.body);
+    res.status(201).json(result);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+ 
+/** Get my availability */
+exports.getMyAvailability = async (req, res) => {
+  try {
+    const result = await doctorService.getMyAvailability(req.user.id);
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+ 
+/** Delete availability */
+exports.deleteAvailability = async (req, res) => {
+  try {
+    await doctorService.deleteAvailability(req.user.id, req.params.id);
+    res.json({ message: "Availability deleted" });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+ 
+/** Patient → view doctor availability */
+exports.getDoctorAvailability = async (req, res) => {
+  try {
+    const data = await doctorService.getDoctorAvailability(req.params.doctorId);
+    res.json(data);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }

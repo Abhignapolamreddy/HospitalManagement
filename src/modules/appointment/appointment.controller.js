@@ -1,4 +1,5 @@
 const service = require("./appointment.service");
+
  
 /**
 * PATIENT → Book
@@ -7,7 +8,7 @@ exports.book = async (req, res) => {
   try {
     const result = await service.bookAppointment({
       ...req.body,
-      patientId: req.user.id,
+        patientId: req.user._id,
     });
  
     res.status(201).json(result);

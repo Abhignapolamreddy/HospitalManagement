@@ -9,9 +9,10 @@ const doctorSchema = new mongoose.Schema(
       unique: true,
     },
  
-    specialist: {
-      type: String,
-      required: true,
+    specializationId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Specialization",
+      required: true
     },
  
     experience: {
@@ -19,13 +20,7 @@ const doctorSchema = new mongoose.Schema(
       default: 0,
     },
  
-    availability: [
-      {
-        day: String,        // MONDAY, TUESDAY
-        startTime: String,  // "10:00"
-        endTime: String,    // "13:00"
-      },
-    ],
+    
   },
   { timestamps: true }
 );

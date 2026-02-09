@@ -1,51 +1,42 @@
-// controllers/adminController.js
+const service = require("./admin.service");
  
-const adminService = require('../services/adminService');
+/**
+ * Register doctor
+ */
+exports.registerDoctor = async (req, res) => {
+  try {
+    const doctor = await service.registerDoctor(req.body);
  
-// Login
-exports.login = (req, res) => {
-    const { email, password } = req.body;
-    const admin = adminService.loginAdmin(email, password);
- 
-    if (!admin) {
-        return res.status(401).json({ message: "Invalid credentials" });
-    }
- 
-    res.json({ message: "Admin logged in", admin });
+    res.status(201).json({
+      message: "Doctor registered successfully",
+      data: doctor,
+    });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 };
  
-// Create specialization
-exports.createSpecialization = (req, res) => {
-    const spec = adminService.createSpecialization(req.body);
-    res.status(201).json(spec);
+/**
+ * Get doctors
+ */
+exports.getDoctors = async (req, res) => {
+  const doctors = await service.getAllDoctors();
+  res.json(doctors);
 };
  
-// Get all specializations
-exports.getSpecializations = (req, res) => {
-    const specs = adminService.getAllSpecializations();
-    res.json(specs);
+/**
+ * Get patients
+ */
+exports.getPatients = async (req, res) => {
+  const patients = await service.getAllPatients();
+  res.json(patients);
 };
  
-// Register doctor
-exports.createDoctor = (req, res) => {
-    const doctor = adminService.createDoctor(req.body);
-    res.status(201).json(doctor);
+/**
+ * Get appointments
+ */
+exports.getAppointments = async (req, res) => {
+  const appointments = await service.getAllAppointments();
+  res.json(appointments);
 };
  
-// Get doctors
-exports.getDoctors = (req, res) => {
-    const doctors = adminService.getAllDoctors();
-    res.json(doctors);
-};
- 
-// Get patients
-exports.getPatients = (req, res) => {
-    const patients = adminService.getAllPatients();
-    res.json(patients);
-};
- 
-// Get appointments
-exports.getAppointments = (req, res) => {
-    const appointments = adminService.getAllAppointments();
-    res.json(appointments);
-};

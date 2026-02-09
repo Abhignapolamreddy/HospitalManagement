@@ -11,13 +11,15 @@ console.log(process.env.JWT_SECRET)
 const authRoutes = require("./modules/auth/auth.routes");
 const doctorRoutes = require("./modules/doctor/doctor.routes");
 const appointmentRoutes = require("./modules/appointment/appointment.routes");
+const patientRoutes=require("./modules/patient/patient.routes")
+const specializationRoutes = require("./modules/specialization/specialization.routes");
+const adminRoutes=require("./modules/admin/admin.routes")
 
 
 //console.log(process.env.JWT_SECRET)
  
 app.use("/api/auth", authRoutes);
-app.use("/hos",userRouter)
-  app.get('/',(req,res)=>{
+//app.use("/hos",userRouter)
  
 
 app.use("/admin",adminRoutes)
@@ -28,6 +30,10 @@ app.use("/doctors", doctorRoutes);
 
  
 app.use("/appointments", appointmentRoutes);
+
+app.use("/patient",patientRoutes);
+
+app.use("/api/specializations", specializationRoutes);
 
 
 app.get('/',(req,res)=>{

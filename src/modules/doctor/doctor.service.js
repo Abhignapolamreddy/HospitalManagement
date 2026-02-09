@@ -1,6 +1,7 @@
 const Doctor = require("../../models/Doctor");
-const User = require("../../models/User");
+const User = require("../../models/Auth");
 const Appointment = require("../../models/Appointment");
+const Availability = require("../../models/Availability");
  
 /**
 * ADMIN → Create doctor profile (USER already exists with role DOCTOR)
@@ -66,7 +67,7 @@ exports.updateAppointmentStatus = async (appointmentId, status) => {
 /**
 * DOCTOR → Update availability
 */
-exports.updateAvailability = async (userId, availability) => {
+/**exports.updateAvailability = async (userId, availability) => {
   const doctor = await Doctor.findOneAndUpdate(
     { userId },
     { availability },
@@ -76,5 +77,43 @@ exports.updateAvailability = async (userId, availability) => {
   if (!doctor) throw new Error("Doctor not found");
  
   return doctor;
+};*/
+
+ 
+/** DOCTOR → Add availability */
+exports.addAvailability = async (userId, data) => {
+  const doctor = await Doctor.findOne({ userId });
+  if (!doctor) throw new Error("Doctor profile not found");
+ 
+  return await Availability.create({
+    doctorId: doctor._id,
+    day: data.day,
+    startTime: data.startTime,
+    endTime: data.endTime,
+  });
+};
+ 
+/** DOCTOR → Get my availability */
+exports.getMyAvailability = async (userId) => {
+  const doctor = await Doctor.findOne({ userId });
+  if (!doctor) throw new Error("Doctor profile not found");
+ 
+  return await Availability.find({ doctorId: doctor._id }).sort({ day: 1 });
+};
+ 
+/** DOCTOR → Delete availability */
+exports.deleteAvailability = async (userId, availabilityId) => {
+  const doctor = await Doctor.findOne({ userId });
+  if (!doctor) throw new Error("Doctor profile not found");
+ 
+  return await Availability.findOneAndDelete({
+    _id: availabilityId,
+    doctorId: doctor._id,
+  });
+};
+ 
+/** PATIENT → View doctor availability */
+exports.getDoctorAvailability = async (doctorId) => {
+  return await Availability.find({ doctorId }).sort({ day: 1 });
 };
 
