@@ -1,25 +1,19 @@
-// routes/adminRoutes.js
- 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const adminController = require('../controllers/adminController');
  
-// Admin login
-router.post('/login', adminController.login);
+const controller = require("./admin.controller");
+const auth = require("../../middleware/authMiddleware");
+const role = require("../../middleware/roleMiddleware");
  
-// Specializations
-router.post('/specializations', adminController.createSpecialization);
-router.get('/specializations', adminController.getSpecializations);
+/**
+* All routes → ADMIN only
+*/
+router.use(auth, role(["ADMIN"]));
  
-// Doctors
-router.post('/doctors', adminController.createDoctor);
-router.get('/doctors', adminController.getDoctors);
- 
-// Patients
-router.get('/patients', adminController.getPatients);
- 
-// Appointments
-router.get('/appointments', adminController.getAppointments);
+router.post("/doctor", controller.registerDoctor);
+router.get("/doctors", controller.getDoctors);
+router.get("/patients", controller.getPatients);
+router.get("/appointments", controller.getAppointments);
  
 module.exports = router;
  

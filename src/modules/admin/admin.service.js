@@ -1,71 +1,55 @@
 
-
+const authService = require("../auth/auth.service");
+const Doctor = require("../../models/Doctor");
+const Patient = require("../../models/Patient");
+const Appointment = require("../../models/Appointment");
  
-let users = [
-    {
-        id: "1",
-        name: "System Admin",
-        email: "admin@hospital.com",
-        password: "admin123",
-        role: "admin"
-    }
-];
+/**
+ * ADMIN → Register Doctor
+ * Reuses auth register (no duplicate logic)
+ */
+exports.registerDoctor = async (data) => {
+  // 1️⃣ create USER via auth service
+  const user = await authService.registerUser({
+    name:data.name,
+    email:data.email,
+    password:data.password,
+    role: "DOCTOR",
+  });
  
-let specializations = [];
-let doctors = [];
-let patients = [];
-let appointments = [];
+  // 2️⃣ create DOCTOR profile (extra doctor-specific fields only)
+  const doctor = await Doctor.create({
+    userId: user._id,
+    specializationId: data.specializationId,
+    experience: data.experience,
+  });
  
-// Admin login
-const loginAdmin = (email, password) => {
-    const admin = users.find(
-        user => user.email === email && user.password === password && user.role === "admin"
-    );
-    return admin || null;
+  return { user, doctor };
 };
  
-
-// Doctor
-const createDoctor = (data) => {
-    const user = {
-        id: Date.now().toString(),
-        name: data.name,
-        email: data.email,
-        password: data.password,
-        role: "doctor"
-    };
-    users.push(user);
- 
-    const doctor = {
-        id: user.id,
-        user_id: user.id,
-        specialization_id: data.specialization_id,
-        experience_years: data.experience_years,
-        consultation_fee: data.consultation_fee
-    };
-    doctors.push(doctor);
- 
-    return doctor;
+/**
+ * ADMIN → Get all doctors
+ */
+exports.getAllDoctors = async () => {
+  return await Doctor.find()
+    .populate("userId", "name email")
+    .populate("specializationId", "name");
 };
  
-const getAllDoctors = () => doctors;
-
-// specialization
-
-
-// Patients
-const getAllPatients = () => patients;
- 
-// Appointments
-const getAllAppointments = () => appointments;
-
- 
-module.exports = {
-    loginAdmin,
-    createSpecialization,
-    getAllSpecializations,
-    createDoctor,
-    getAllDoctors,
-    getAllPatients,
-    getAllAppointments
+/**
+ * ADMIN → Get all patients
+ */
+exports.getAllPatients = async () => {
+  return await Patient.find().populate("userId", "name email");
 };
+ 
+/**
+ * ADMIN → Get all appointments
+ */
+exports.getAllAppointments = async () => {
+  return await Appointment.find()
+    .populate("doctorId", "name email")
+    .populate("patientId", "name email")
+    .sort({ appointmentTime: -1 });
+};
+ 
